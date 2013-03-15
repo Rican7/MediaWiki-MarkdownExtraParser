@@ -30,6 +30,16 @@ class MarkdownExtraParser {
 		return true;
 	}
 
+	public static function fixLinkNonsense( &$parser, &$text ) {
+		$regex = '/&lt;(a href|img src)="(<.*?>)?(.*?)(<\/a>".*?&gt;|"&gt;)((.*?)(&lt;(\/a)?&gt;))?/';
+		$text = preg_replace( $regex, '<$1="$3">$6<$8>', $text );
+		return true;
+	}
+
+	public static function noOp() {
+		return false;
+	}
+
 } // End class MarkdownExtraParser
 
 
@@ -44,7 +54,7 @@ if ( defined( 'MEDIAWIKI' ) ) {
 
 	// Register our MediaWiki parser hooks
 	$wgHooks['ParserBeforeStrip'][] = array( 'MarkdownExtraParser::parseAsMarkdown' );
-	// $wgHooks['ParserAfterStrip'][] = array( $markdownExtraParser, 'stripParagraphTags' );
+	$wgHooks['InternalParseBeforeLinks'][] = array( 'MarkdownExtraParser::fixLinkNonsense' );
 
 } // End MediaWiki env
 
@@ -94,7 +104,23 @@ class MarkdownExtraOverride extends MarkdownExtra_Parser {
 		return $text;
 	}
 
+	/**
+	 * Overwrite the code and pre order
+	 * (code, then pre.... not the other way around)
+	 * 
+	 * @see \MarkdownExtra_Parser::_doCodeBlocks_callback
+	 */
+	function _doCodeBlocks_callback($matches) {
+		$codeblock = $matches[1];
+
+		$codeblock = $this->outdent($codeblock);
+		$codeblock = htmlspecialchars($codeblock, ENT_NOQUOTES);
+
+		# trim leading newlines and trailing newlines
+		$codeblock = preg_replace('/\A\n+|\n+\z/', '', $codeblock);
+
+		$codeblock = "<code><pre>$codeblock\n</pre></code>";
+		return "\n\n".$this->hashBlock($codeblock)."\n\n";
+	} // End function _doCodeBlocks_callback
+
 } // End class MarkdownExtraOverride
-/**
- *  
- */
