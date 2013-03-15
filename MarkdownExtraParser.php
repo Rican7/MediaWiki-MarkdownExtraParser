@@ -28,8 +28,24 @@ class MarkdownExtraParser {
 	/**
 	 * Class properties
 	 */
+	private $config;
 	private $parseContent;
 
+	public function setConfig( $config ) {
+		if ( !is_array( $config ) ) {
+			throw new Exception( 'MarkdownExtraParser: Passed configuration isn\'t an array' );
+		}
+
+		$this->config = $config;
+	}
+
+	public function getConfig( $key_name ) {
+		if ( !is_null( $this->config ) && isset( $this->config[ $key_name ] ) ) {
+			return $this->config[ $key_name ];
+		}
+
+		return null;
+	}
 
 	public function saveContent( &$parser, &$text ) {
 		$this->parseContent = $text;
@@ -71,10 +87,18 @@ if ( defined( 'MEDIAWIKI' ) ) {
 	// Instanciate
 	$markdownExtraParser = new MarkdownExtraParser();
 
+	// If we have set options, let's pass them in
+	if ( isset( $MarkdownExtraParserOptions ) ) {
+		$markdownExtraParser->setConfig( $MarkdownExtraParserOptions );
+	}
+
 	// Register our MediaWiki parser hooks
 	$wgHooks['ParserBeforeStrip'][] = array( $markdownExtraParser, 'parseAsMarkdown' );
-	$wgHooks['InternalParseBeforeSanitize'][] = array( $markdownExtraParser, 'saveContent' );
-	$wgHooks['InternalParseBeforeLinks'][] = array( $markdownExtraParser, 'retrieveContent' );
+
+	if ( $markdownExtraParser->getConfig( 'use_raw_html' ) ) {
+		$wgHooks['InternalParseBeforeSanitize'][] = array( $markdownExtraParser, 'saveContent' );
+		$wgHooks['InternalParseBeforeLinks'][] = array( $markdownExtraParser, 'retrieveContent' );
+	}
 
 } // End MediaWiki env
 
