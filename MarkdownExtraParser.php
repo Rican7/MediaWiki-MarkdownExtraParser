@@ -25,6 +25,22 @@
  */
 class MarkdownExtraParser {
 
+	/**
+	 * Class properties
+	 */
+	private $parseContent;
+
+
+	public function saveContent( &$parser, &$text ) {
+		$this->parseContent = $text;
+		return true;
+	}
+
+	public function retrieveContent( &$parser, &$text ) {
+		$text = $this->parseContent;
+		return true;
+	}
+
 	public static function parseAsMarkdown( &$parser, &$text ) {
 		$text = Markdown( $text );
 		return true;
@@ -52,9 +68,13 @@ if ( defined( 'MEDIAWIKI' ) ) {
 	// Require the Markdown library
 	require_once( __DIR__ . DIRECTORY_SEPARATOR . 'markdown.php' );
 
+	// Instanciate
+	$markdownExtraParser = new MarkdownExtraParser();
+
 	// Register our MediaWiki parser hooks
-	$wgHooks['ParserBeforeStrip'][] = array( 'MarkdownExtraParser::parseAsMarkdown' );
-	$wgHooks['InternalParseBeforeLinks'][] = array( 'MarkdownExtraParser::fixLinkNonsense' );
+	$wgHooks['ParserBeforeStrip'][] = array( $markdownExtraParser, 'parseAsMarkdown' );
+	$wgHooks['InternalParseBeforeSanitize'][] = array( $markdownExtraParser, 'saveContent' );
+	$wgHooks['InternalParseBeforeLinks'][] = array( $markdownExtraParser, 'retrieveContent' );
 
 } // End MediaWiki env
 
