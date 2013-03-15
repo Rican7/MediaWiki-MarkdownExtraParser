@@ -13,10 +13,16 @@
  */
 
 
+// Credits
+$wgExtensionCredits['parserhook'][] = array(
+	'name' => 'MarkdownExtraParser',
+	'author' => 'Trevor Suarez (Rican7)',
+	'description' => 'A quick MediaWiki hook for using a Markdown parser',
+);
 
 
 /**
- * MarkdownExtraParser 
+ * MarkdownExtraParser
  *
  * MediaWiki content parser designed to utilize Michael Fortin's
  * PHP-Markdown Extra library
@@ -113,6 +119,12 @@ if ( defined( 'MEDIAWIKI' ) ) {
  */
 class MarkdownExtraOverride extends MarkdownExtra_Parser {
 
+	/**
+	 * Overwrite the paragraph former so we don't
+	 * get paragraph tags in weird places (like the title tag)
+	 * 
+	 * @see \MarkdownExtra_Parser::formParagraphs
+	 */
 	function formParagraphs($text) {
 	#
 	#	Params:
@@ -146,7 +158,7 @@ class MarkdownExtraOverride extends MarkdownExtra_Parser {
 		$text = $this->unhash($text);
 		
 		return $text;
-	}
+	} // End function formParagraphs
 
 	/**
 	 * Overwrite the code and pre order
