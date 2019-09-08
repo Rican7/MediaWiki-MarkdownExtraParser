@@ -1,0 +1,15 @@
+{
+	"name": "MarkdownExtraParser",
+	"version": "0.1",
+	"author": [
+		"Rican7"
+	],
+	"url": "https://www.mediawiki.org/wiki/Extension:MarkdownExtraParser",
+	"description": "A quick MediaWiki hook for using a Markdown parser",
+	"license-name": "MIT",
+	"type": "editor",
+	"requires": {
+		"MediaWiki": ">= 1.20.0"
+	},
+	"manifest_version": 1
+}
